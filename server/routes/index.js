@@ -8,7 +8,10 @@ const {
     signUp,
     isAuth,
     getProfileData,
-    getProductById} = require('../controllers/index.controllers');
+    getProductById,
+    getAllOrdersByCustomerId,
+    getOrderById,
+    authView} = require('../controllers/index.controllers');
 
 router.get('/', (req,res) =>{
     res.send('Hello World');
@@ -33,10 +36,9 @@ router.get('/logout', isAuth, (req, res) =>{
     res.redirect('/login');
 })
 
-//router.post('/checkout/confirm');
-//router.get('/orders', isLoggedIn, getAllOrdersByCustomerId);
-//router.get('/orders/:orderId');
-//router.put('/orders/:orderId');
+router.post('/checkout/confirm', isAuth,postOrder);
+router.get('/orders', isAuth, getAllOrdersByCustomerId);
+router.get('/orders/:orderId', isAuth, authView,getOrderById);
 router.get('/products', getAllProducts);
 router.get('/products/:productId', getProductById);
 
