@@ -1,8 +1,7 @@
 require('dotenv').config();
 const { response } = require('express');
 const {Pool} = require('pg');
-const {saltHashPasword, sha512} = require('../../utils/password-store');
-
+const bcrypt = require('bcryptjs');
 
 const pool = new Pool({
     user: process.env.PGUSER,
@@ -24,43 +23,8 @@ const postOrder = async (req, res) => {
         [order_id, item, items[item].quantity]);
     })
 };
-/*
-const signUp = async (req, res) => {
-    const {email, password} =req.body;
-    const {salt, paswordHash } = saltHashPasword(email, password);
-    await pool.query('INSERT INTO login (email, salt, pwhash) VALUES ($1, $2, $3)', [email, salt, paswordHash]);
-    res.status(201).redirect('/dashboard')
 
-}
 
-const checkLogin = async (req, res) => {
-    const {email, password} = req.body;
-    
-    const response = await pool.query('SELECT salt, pwhash FROM login WHERE email = $1', [email]);
-    if (response.rows.length === 0 ) {
-        res.status(401).redirect('/login'); 
-    }
-    const salt = response.rows[0].salt;
-    const real = response.rows[0].pwhash;
-    const attempt = sha512(password, salt).paswordHash;
-    if (real === attempt ) {
-        res.status(200).redirect('/dashboard');
-    } else {
-        res.status(401).redirect('/login');
-    }
-    
-}
-
-const isSignedUp = async (req, res, next) => {
-    const {email} = req.body;
-    response = await pool.query('SELECT email from login WHERE email = $1', [email]);
-    if (response) {
-        res.status(200).redirect('/login'); //User already registered, must log in
-    } else {
-        next();
-    }
-}
-*/
 const getProfileData = async (req, res) =>{
   //How do I get my Id??  
 }
@@ -101,20 +65,26 @@ const getProductById = async (req, res) =>{
 }
 
 const isOrderMine = async (req, res, next) =>{
-    const customerId
+}
+
+const signUp = async (req, res) =>{
+    const {email, password, firstName, lastName, defaultAddress} = req.body;
+    const saltRounds = parseInt(process.env.saltRounds);
+    const hash = await bcrypt.hash(password, saltRounds);
+    await pool.query('INSERT INTO customers (first_name, last_name, email, default_address) VALUES ($1, $2, $3, $4)', [firstName, lastName, email, defaultAddress]); 
+    await pool.query('INSERT INTO login (email, pwhash) VALUES ($1, $2)', [email, hash])
+    res.status(201).send('Success');
 }
 
 module.exports = {
     getAllOrdersByCustomerId, 
     postOrder, 
-    checkLogin, 
-    signUp, 
-    isSignedUp,
     getProfileData,
     getAllProducts,
     getProductById,
     getOrderById,
     isOrderMine,
+    signUp,
     pool};
 
 
