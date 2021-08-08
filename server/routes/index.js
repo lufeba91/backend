@@ -1,10 +1,9 @@
 const {Router} = require('express');
 const router = Router();
 const {
-    getAllOrdersByCustomerId, 
     postOrder, 
-    getProfileData,
     getAllProducts,
+    isUserRegistered,
     signUp,
     getProductById} = require('../controllers/index.controllers');
 
@@ -15,7 +14,7 @@ router.get('/', (req,res) =>{
 //router.get('/login', checkLogin);
 //router.get('/dashboard', isLoggedIn, getProfileData);
 
-router.post('/signup', signUp) //Add check if email already exists in db
+router.post('/signup', isUserRegistered, signUp);
 
 //router.put('/checkout/confirm');
 //router.get('/orders', isLoggedIn, getAllOrdersByCustomerId);

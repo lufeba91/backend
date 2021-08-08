@@ -24,30 +24,6 @@ const postOrder = async (req, res) => {
     })
 };
 
-
-const getProfileData = async (req, res) =>{
-  //How do I get my Id??  
-}
-
-const getAllOrdersByCustomerId = async (req, res) => {//needs fixing. Customer ID can not be provided by body
-    const {customerId} = req.body;
-    const response = await pool.query('SELECT date, address, payment_method FROM orders WHERE customer_id = $1', [customerId]);
-    if (!response){
-        res.status(404).send();
-    }
-    res.status(200).send(response.rows);
-
-}
-
-const getOrderById = async (req, res) => {
-    const orderId = req.params.orderId;
-    const response = await pool.query('SELECT order_quantity, description, price FROM orders_items JOIN items_data ON orders_items.item_id = items_data.item_id WHERE order_id = $1;', [orderId]);
-    if (!response) {
-        res.status(404).send();
-    }
-    res.status(200).send(response.rows);
-}
-
 const getAllProducts = async (req, res) =>{
     response = await pool.query('SELECT description, price, picture FROM items_data');
     res.send(response.rows);
@@ -76,13 +52,20 @@ const signUp = async (req, res) =>{
     res.status(201).send('Success');
 }
 
+const isUserRegistered = async (req, res, next) =>{
+    const {email} = req.body;
+    const response = await pool.query('SELECT email FROM login WHERE email=$1', [email]);
+    if (response.rows.length > 0) {
+        res.status(401).send('User already registered. Please log in');
+    } else {
+    next();
+    }
+}
 module.exports = {
-    getAllOrdersByCustomerId, 
     postOrder, 
-    getProfileData,
     getAllProducts,
     getProductById,
-    getOrderById,
+    isUserRegistered,
     isOrderMine,
     signUp,
     pool};
