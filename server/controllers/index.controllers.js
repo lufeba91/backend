@@ -35,9 +35,7 @@ const getProductById = async (req, res) =>{
     if (response.rows.length === 0 ) {
         res.status(404).send('Not found');
     }
-    
     res.send(response.rows);
-
 }
 
 const isOrderMine = async (req, res, next) =>{
@@ -61,13 +59,30 @@ const isUserRegistered = async (req, res, next) =>{
     next();
     }
 }
+
+const isAuth = (req, res, next) =>{
+    if(req.isAuthenticated()) {
+        next();
+    } else {
+        res.status(401).redirect('/login')
+    }
+}
+
+const getProfileData = async (req, res) =>{
+    console.log(req.user);
+    const response = await pool.query('SELECT customer_id, first_name, last_name, email, default_address FROM customers WHERE email=$1', [req.user.email]);
+    res.send(response.rows);
+
+}
 module.exports = {
     postOrder, 
     getAllProducts,
     getProductById,
+    getProfileData,
     isUserRegistered,
     isOrderMine,
     signUp,
+    isAuth,
     pool};
 
 
