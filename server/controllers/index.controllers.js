@@ -25,15 +25,15 @@ const postOrder = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) =>{
-    response = await pool.query('SELECT description, price, picture FROM items_data');
+    const response = await pool.query('SELECT description, price, picture FROM items_data');
     res.send(response.rows);
 }
 
 const getProductById = async (req, res) =>{
     const productId = req.params.productId;
     const response = await pool.query('SELECT description, price, picture, quantity FROM items_data WHERE item_id = $1', [productId]);
-    if (!response) {
-        res.status(404).send();
+    if (response.rows.length === 0 ) {
+        res.status(404).send('Not found');
     }
     
     res.send(response.rows);
